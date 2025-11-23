@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ESPN NBA Boxscore Fix",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Restores the classic stat column order on ESPN NBA and WNBA boxscore pages.",
     "icons": {
     "16": "images/icon-16.png",
