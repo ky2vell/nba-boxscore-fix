@@ -5,15 +5,15 @@ function normalizeHeader(text) {
 }
 
 // Desired column order
-const desiredOrder = new Set(['MIN', 'FG', '3PT', 'FT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF', '+/-', 'PTS']);
+const desiredOrder = ['MIN', 'FG', '3PT', 'FT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF', '+/-', 'PTS'];
 
 // Determine whether <tbody> is NBA boxscore
 function isBoxScore(tbody) {
-    const firstCell = tbody.rows[0].cells[0];
-    if (!firstCell) return false;
+    const firstRow = tbody.rows[0];
+    if (!firstRow) return false;
 
-    const label = normalizeHeader(firstCell.innerText || '');
-    return desiredOrder.has(label);
+    // Boxscore stat rows always have 14 data columns
+    return firstRow.cells.length === 14;
 }
 
 // Reorder single <tr> at a time

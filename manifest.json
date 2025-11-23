@@ -15,11 +15,11 @@
       "run_at": "document_end",
       "matches": [
         "https://www.espn.com/nba/boxscore*",
-        "https://www.espn.com/nba/boxscore*",
+        "https://www.espn.com/wnba/boxscore*",
         "https://www.espn.co.uk/nba/boxscore*",
-        "https://www.espn.co.uk/nba/boxscore*",
+        "https://www.espn.co.uk/wnba/boxscore*",
         "https://www.espn.com.au/nba/boxscore*",
-        "https://www.espn.com.au/nba/boxscore*"
+        "https://www.espn.com.au/wnba/boxscore*"
       ]
     }
   ]
