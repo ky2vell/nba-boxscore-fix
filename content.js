@@ -1,3 +1,5 @@
+'use strict';
+
 function normalizeHeader(text) {
     return text.replace(/\s+/g, '').toUpperCase();
 }
