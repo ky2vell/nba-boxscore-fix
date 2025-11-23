@@ -58,3 +58,10 @@ function applyFix() {
 
 // Run
 applyFix();
+
+// Re-run in case of browser resize
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(applyFix, 250);
+});
