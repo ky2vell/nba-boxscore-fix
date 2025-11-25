@@ -12,21 +12,20 @@ function isBoxScore(tbody) {
     const firstRow = tbody.rows[0];
     if (!firstRow) return false;
 
-    // Boxscore stat rows always have 14 data columns
+    // Boxscores always have 14 stat columns
     return firstRow.cells.length === 14;
 }
 
 // Reorder single <tr> at a time
 function reorderBoxScore(tbody) {
-    const rows = Array.from(tbody.rows);
-    if (!rows.length) return;
+    const rows = [...tbody.rows];
 
     // Build existing header/column map from first row
-    const headerCells = Array.from(rows[0].children);
+    const headerCells = [...rows[0].children];
     const headerMap = {};
 
     headerCells.forEach((cell, index) => {
-        const label = normalizeHeader(cell.innerText.trim());
+        const label = normalizeHeader(cell.innerText);
         if (label) headerMap[label] = index;
     });
 
@@ -37,12 +36,12 @@ function reorderBoxScore(tbody) {
             return;
         }
 
-        const cells = Array.from(row.children);
+        const cells = [...row.children];
         const newCells = [];
 
         desiredOrder.forEach(stat => {
             const idx = headerMap[stat];
-            if (idx != null && cells[idx]) newCells.push(cells[idx]);
+            if (idx != null) newCells.push(cells[idx]);
         });
 
         row.innerHTML = '';
