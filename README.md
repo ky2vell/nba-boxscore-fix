@@ -2,17 +2,12 @@
 
 Restores the classic, intuitive stat column order on ESPN NBA and WNBA boxscore pages.
 
-## Installation (dev mode)
-
-1. Download or clone this folder.
-2. Open `chrome://extensions`.
-3. Enable **Developer Mode**.
-4. Click **Load unpacked**.
-5. Select this folder.
+**Install from the Chrome Web Store:**  
+[ESPN NBA Boxscore Fix](https://chromewebstore.google.com/detail/espn-nba-boxscore-fix/gkpjoleaiffgglpeikdgldjdgbgfgbmf)
 
 The fix applies automatically on supported boxscore pages.
 
 ## Notes
 
-- Reorders columns based on header text, not position.
+- Reorders columns based on header text rather than position.
 - Lightweight: no permissions beyond a simple content script.
