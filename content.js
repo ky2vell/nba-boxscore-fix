@@ -5,22 +5,27 @@ function normalizeHeader(text) {
 }
 
 // Desired column order
-const desiredOrder = ['MIN', 'FG', '3PT', 'FT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF', '+/-', 'PTS'];
+const proOrder = ['MIN', 'FG', '3PT', 'FT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF', '+/-', 'PTS'];
+const collegeOrder = ['MIN', 'FG', '3PT', 'FT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF', 'PTS'];
 
 // Determine whether <tbody> is NBA boxscore
 function isBoxScore(tbody) {
     const firstRow = tbody.rows[0];
     if (!firstRow) return false;
 
-    // Boxscores always have 14 stat columns
-    return firstRow.cells.length === 14;
+    const count = firstRow.cells.length;
+
+    if (count === 14) return proOrder; // NBA and WNBA (has +/-)
+    if (count === 13) return collegeOrder; // NCAA (no +/-)
+
+    return false;
 }
 
 // Reorder single <tr> at a time
-function reorderBoxScore(tbody) {
+function reorderBoxScore(tbody, desiredOrder) {
     const rows = [...tbody.rows];
 
-    // Build existing header/column map from first row
+    // Build existing column map from first row
     const headerCells = [...rows[0].children];
     const headerMap = {};
 
@@ -40,8 +45,8 @@ function reorderBoxScore(tbody) {
         const newCells = [];
 
         desiredOrder.forEach(stat => {
-            const idx = headerMap[stat];
-            if (idx != null) newCells.push(cells[idx]);
+            const index = headerMap[stat];
+            if (index != null) newCells.push(cells[index]);
         });
 
         row.innerHTML = '';
@@ -51,9 +56,8 @@ function reorderBoxScore(tbody) {
 
 function applyFix() {
     document.querySelectorAll('tbody').forEach(tbody => {
-        if (isBoxScore(tbody)) {
-            reorderBoxScore(tbody);
-        }
+        const desiredOrder = isBoxScore(tbody);
+        if (desiredOrder) reorderBoxScore(tbody, desiredOrder);
     });
 }
 
