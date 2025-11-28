@@ -1,13 +1,21 @@
-# ESPN NBA Boxscore Fix — Chrome Extension
+# ESPN Basketball Box Score Fix — Chrome Extension
 
-Restores the classic, intuitive stat column order on ESPN NBA and WNBA boxscore pages.
+Restores the classic stat column order on ESPN NBA, WNBA, and NCAA men's & women's basketball box score pages.
 
 **Install from the Chrome Web Store:**  
-[ESPN NBA Boxscore Fix](https://chromewebstore.google.com/detail/espn-nba-boxscore-fix/gkpjoleaiffgglpeikdgldjdgbgfgbmf)
+[ESPN Basketball Box Score Fix](https://chromewebstore.google.com/detail/espn-nba-boxscore-fix/gkpjoleaiffgglpeikdgldjdgbgfgbmf)
 
 The fix applies automatically on supported boxscore pages.
 
+**Supported box scores:**
+✅ NBA
+✅ NBA G League
+✅ NBA Summer League
+✅ WNBA
+✅ NCAA Men’s Basketball
+✅ NCAA Women’s Basketball
+
 ## Notes
 
-- Reorders columns based on header text rather than position.
 - Lightweight: no permissions beyond a simple content script.
+- Future proof: reorders columns based on header text, column count.
