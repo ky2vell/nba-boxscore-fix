@@ -44,7 +44,7 @@ function reorderBoxScore(tbody, newOrder) {
 
         newOrder.forEach(stat => {
             const index = headerMap[stat];
-            if (index != null) newCells.push(cells[index]);
+            if (index >= 0) newCells.push(cells[index]);
         });
 
         row.replaceChildren(...newCells);
@@ -81,6 +81,8 @@ document.addEventListener('click', e => {
     const href = target.getAttribute('href') || '';
     if (!href.includes('/boxscore/')) return;
 
+    const root = document.querySelector('main') || document.body;
+
     const observer = new MutationObserver((_, obs) => {
         const container = document.querySelector('.Boxscore, .boxscore');
         if (container) {
@@ -89,7 +91,6 @@ document.addEventListener('click', e => {
         }
     });
 
-    const root = document.querySelector('main') || document.body;
     observer.observe(root, { childList: true, subtree: true });
 
     // Stop observing after 5s if weirdness happens
