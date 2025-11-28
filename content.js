@@ -5,24 +5,22 @@ function normalizeHeader(text) {
 }
 
 // Desired column order
-const proOrder = ['MIN', 'FG', '3PT', 'FT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF', '+/-', 'PTS'];
-const collegeOrder = ['MIN', 'FG', '3PT', 'FT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF', 'PTS'];
+const proBoxScore = ['MIN', 'FG', '3PT', 'FT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF', '+/-', 'PTS'];
+const ncaaBoxScore = ['MIN', 'FG', '3PT', 'FT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF', 'PTS'];
 
-// Determine whether <tbody> is NBA boxscore
-function isBoxScore(tbody) {
+function getBoxScoreType(tbody) {
     const firstRow = tbody.rows[0];
     if (!firstRow) return false;
 
     const count = firstRow.cells.length;
-
-    if (count === 14) return proOrder; // NBA and WNBA (has +/-)
-    if (count === 13) return collegeOrder; // NCAA (no +/-)
+    if (count === 14) return proBoxScore; // NBA and WNBA (has +/-)
+    if (count === 13) return ncaaBoxScore; // NCAA (no +/-)
 
     return false;
 }
 
 // Reorder single <tr> at a time
-function reorderBoxScore(tbody, desiredOrder) {
+function reorderBoxScore(tbody, newOrder) {
     const rows = [...tbody.rows];
 
     // Build existing column map from first row
@@ -30,7 +28,7 @@ function reorderBoxScore(tbody, desiredOrder) {
     const headerMap = {};
 
     headerCells.forEach((cell, index) => {
-        const label = normalizeHeader(cell.innerText);
+        const label = normalizeHeader(cell.textContent);
         if (label) headerMap[label] = index;
     });
 
@@ -44,20 +42,24 @@ function reorderBoxScore(tbody, desiredOrder) {
         const cells = [...row.children];
         const newCells = [];
 
-        desiredOrder.forEach(stat => {
+        newOrder.forEach(stat => {
             const index = headerMap[stat];
             if (index != null) newCells.push(cells[index]);
         });
 
-        row.innerHTML = '';
-        newCells.forEach(cell => row.appendChild(cell));
+        row.replaceChildren(...newCells);
     });
 }
 
 function applyFix() {
-    document.querySelectorAll('tbody').forEach(tbody => {
-        const desiredOrder = isBoxScore(tbody);
-        if (desiredOrder) reorderBoxScore(tbody, desiredOrder);
+    const boxscore = document.querySelector('.Boxscore, .boxscore');
+    if (!boxscore) return;
+
+    boxscore.querySelectorAll('tbody').forEach(tbody => {
+        const order = getBoxScoreType(tbody); // returns proBoxScore, ncaaBoxScore, or false
+        if (order) {
+            reorderBoxScore(tbody, order);
+        }
     });
 }
 
@@ -69,4 +71,27 @@ let resizeTimeout;
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(applyFix, 250);
+});
+
+// Listen for Full Box Score clicks in other tabs
+document.addEventListener('click', e => {
+    const target = e.target.closest('a');
+    if (!target) return;
+
+    const href = target.getAttribute('href') || '';
+    if (!href.includes('/boxscore/')) return;
+
+    const observer = new MutationObserver((_, obs) => {
+        const container = document.querySelector('.Boxscore, .boxscore');
+        if (container) {
+            applyFix();
+            obs.disconnect();
+        }
+    });
+
+    const root = document.querySelector('main') || document.body;
+    observer.observe(root, { childList: true, subtree: true });
+
+    // Stop observing after 5s if weirdness happens
+    setTimeout(() => observer.disconnect(), 5000);
 });

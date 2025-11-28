@@ -14,20 +14,20 @@
       "js": ["content.js"],
       "run_at": "document_end",
       "matches": [
-        "https://www.espn.com/nba/boxscore*",
-        "https://www.espn.com/nba-summer-league/boxscore*",
-        "https://www.espn.com/nba-g-league/boxscore*",
-        "https://www.espn.com/wnba/boxscore*",
-        "https://www.espn.com/mens-college-basketball/boxscore*",
-        "https://www.espn.com/womens-college-basketball/boxscore*",
-        "https://www.espn.co.uk/nba/boxscore*",
-        "https://www.espn.co.uk/wnba/boxscore*",
-        "https://www.espn.co.uk/mens-college-basketball/boxscore*",
-        "https://www.espn.co.uk/womens-college-basketball/boxscore*",
-        "https://www.espn.com.au/nba/boxscore*",
-        "https://www.espn.com.au/wnba/boxscore*",
-        "https://www.espn.com.au/mens-college-basketball/boxscore*",
-        "https://www.espn.com.au/womens-college-basketball/boxscore*"
+        "https://www.espn.com/nba/*",
+        "https://www.espn.com/nba-summer-league/*",
+        "https://www.espn.com/nba-g-league/*",
+        "https://www.espn.com/wnba/*",
+        "https://www.espn.com/mens-college-basketball/*",
+        "https://www.espn.com/womens-college-basketball/*",
+        "https://www.espn.co.uk/nba/*",
+        "https://www.espn.co.uk/wnba/*",
+        "https://www.espn.co.uk/mens-college-basketball/*",
+        "https://www.espn.co.uk/womens-college-basketball/*",
+        "https://www.espn.com.au/nba/*",
+        "https://www.espn.com.au/wnba/*",
+        "https://www.espn.com.au/mens-college-basketball/*",
+        "https://www.espn.com.au/womens-college-basketball/*"
       ]
     }
   ]
