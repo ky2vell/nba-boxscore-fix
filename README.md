@@ -8,6 +8,7 @@ Restores the classic stat column order on ESPN NBA, WNBA, and NCAA men's & women
 The fix applies automatically on supported boxscore pages.
 
 **Supported box scores:**
+
 ✅ NBA
 ✅ NBA G League
 ✅ NBA Summer League
