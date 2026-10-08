@@ -1,98 +1,111 @@
 'use strict';
 
-function normalizeHeader(text) {
-    return text.replace(/\s+/g, '').toUpperCase();
-}
-
 // Desired column order
-const proBoxScore = ['MIN', 'FG', '3PT', 'FT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF', '+/-', 'PTS'];
-const ncaaBoxScore = ['MIN', 'FG', '3PT', 'FT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF', 'PTS'];
+const PRO_ORDER  = ['MIN', 'FG', '3PT', 'FT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF', '+/-', 'PTS']; // NBA/WNBA
+const NCAA_ORDER = ['MIN', 'FG', '3PT', 'FT', 'OREB', 'DREB', 'REB', 'AST', 'STL', 'BLK', 'TO', 'PF', 'PTS'];        // NCAA
 
-function getBoxScoreType(tbody) {
-    const firstRow = tbody.rows[0];
-    if (!firstRow) return false;
+const CLONE  = 'data-bsfix-clone';   // marks our reordered copy
+const HIDDEN = 'data-bsfix-hidden';  // marks ESPN's original (hidden) tbody
+const lastSeen = new WeakMap();      // original tbody -> its textContent when we last copied it
 
-    const count = firstRow.cells.length;
-    if (count === 14) return proBoxScore; // NBA and WNBA (has +/-)
-    if (count === 13) return ncaaBoxScore; // NCAA (no +/-)
+// Hide originals with a stylesheet instead of touching React's style prop
+const style = document.createElement('style');
+style.textContent = `tbody[${HIDDEN}] { display: none !important; }`;
+(document.head || document.documentElement).appendChild(style);
 
-    return false;
+const normalizeHeader = text => text.replace(/\s+/g, '').toUpperCase();
+
+function getOrder(tbody) {
+    const count = tbody.rows[0]?.cells.length;
+    if (count === 14) return PRO_ORDER;
+    if (count === 13) return NCAA_ORDER;
+    return null;
 }
 
-// Reorder single <tr> at a time
-function reorderBoxScore(tbody, newOrder) {
+// Reorders cells in place. Only ever called on OUR clone, never on React's nodes.
+function reorder(tbody, order) {
     const rows = [...tbody.rows];
-
-    // Build existing column map from first row
-    const headerCells = [...rows[0].children];
     const headerMap = {};
-
-    headerCells.forEach((cell, index) => {
+    [...rows[0].cells].forEach((cell, i) => {
         const label = normalizeHeader(cell.textContent);
-        if (label) headerMap[label] = index;
+        if (label) headerMap[label] = i;
     });
 
-    // Reorder all rows
-    rows.forEach(row => {
-        // Ignore DNP rows
-        if (row.children.length === 1 && row.children[0].hasAttribute('colspan')) {
-            return;
-        }
+    // If ESPN renames a column, bail out and leave their table visible
+    if (!order.every(stat => stat in headerMap)) return false;
 
-        const cells = [...row.children];
-        const newCells = [];
+    for (const row of rows) {
+        // Skip DNP rows
+        if (row.cells.length === 1 && row.cells[0].hasAttribute('colspan')) continue;
+        const cells = [...row.cells];
+        row.replaceChildren(...order.map(stat => cells[headerMap[stat]]));
+    }
+    return true;
+}
 
-        newOrder.forEach(stat => {
-            const index = headerMap[stat];
-            if (index >= 0) newCells.push(cells[index]);
-        });
+function syncTbody(src) {
+    const order = getOrder(src);
+    if (!order) return;
 
-        row.replaceChildren(...newCells);
-    });
+    const next = src.nextElementSibling;
+    const existing = next && next.hasAttribute(CLONE) ? next : null;
+    const signature = src.textContent;
+
+    // Clone still in place and stats unchanged: nothing to do
+    if (existing && lastSeen.get(src) === signature) return;
+
+    const clone = src.cloneNode(true);
+    clone.setAttribute(CLONE, '');
+    clone.removeAttribute(HIDDEN);
+
+    if (!reorder(clone, order)) {
+        existing?.remove();
+        src.removeAttribute(HIDDEN);
+        return;
+    }
+
+    if (existing) existing.replaceWith(clone);
+    else src.after(clone);
+
+    src.setAttribute(HIDDEN, '');
+    lastSeen.set(src, signature);
 }
 
 function applyFix() {
-    const boxscore = document.querySelector('.Boxscore, .boxscore');
-    if (!boxscore) return;
+    const root = document.querySelector('.Boxscore, .boxscore');
+    if (!root) return;
 
-    boxscore.querySelectorAll('tbody').forEach(tbody => {
-        const order = getBoxScoreType(tbody); // returns proBoxScore, ncaaBoxScore, or false
-        if (order) {
-            reorderBoxScore(tbody, order);
-        }
+    // Remove clones whose original React removed or moved
+    root.querySelectorAll(`tbody[${CLONE}]`).forEach(clone => {
+        const prev = clone.previousElementSibling;
+        if (!prev || prev.tagName !== 'TBODY' || prev.hasAttribute(CLONE)) clone.remove();
     });
+
+    root.querySelectorAll(`tbody:not([${CLONE}])`).forEach(syncTbody);
 }
 
-// Run
-applyFix();
+// One long-lived observer covers hydration, live stat updates,
+// resize re-renders, and in-page tab navigation.
+let scheduled = false;
 
-// Re-run in case of browser resize
-let resizeTimeout;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(applyFix, 250);
+const observer = new MutationObserver(() => {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(run);
 });
 
-// Listen for Full Box Score clicks in other tabs
-document.addEventListener('click', e => {
-    const target = e.target.closest('a');
-    if (!target) return;
+function observe() {
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+}
 
-    const href = target.getAttribute('href') || '';
-    if (!href.includes('/boxscore/')) return;
+function run() {
+    scheduled = false;
+    observer.disconnect(); // don't react to our own changes
+    try {
+        applyFix();
+    } finally {
+        observe();
+    }
+}
 
-    const root = document.querySelector('main') || document.body;
-
-    const observer = new MutationObserver((_, obs) => {
-        const container = document.querySelector('.Boxscore, .boxscore');
-        if (container) {
-            applyFix();
-            obs.disconnect();
-        }
-    });
-
-    observer.observe(root, { childList: true, subtree: true });
-
-    // Stop observing after 5s if weirdness happens
-    setTimeout(() => observer.disconnect(), 5000);
-});
+run();
